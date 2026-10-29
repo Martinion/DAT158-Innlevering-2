@@ -1,18 +1,20 @@
 import pandas as pd
 import gradio as gr
 import joblib
-import mapping
+from sklearn.datasets import load_breast_cancer
+import datasets
 
-feature_map = mapping.feature_map
+feature_map = datasets.feature_map
 
-loaded_model = joblib.load("mushroom_model.joblib")
-feature_names = list(feature_map.keys())
+MODELS_DIR = "models/"
+MODEL_SUFFIX = ".joblib"
 
-def predict_mushroom(*inputs):
-    data_dict = {}
+loaded_model = joblib.load("models/cancer_model.joblib")
+feature_names = list(loaded_model.feature_names_in_)
 
-    for feature, value in zip(feature_names, inputs):
-        data_dict[feature] = [feature_map[feature][value]]
+
+def predict(*inputs):
+    data_dict = {name: [value] for name, value in zip(feature_names, inputs)}
 
     input_df= pd.DataFrame(data_dict)
     pred = loaded_model.predict(input_df)[0]
@@ -21,22 +23,22 @@ def predict_mushroom(*inputs):
     proba_str = ", ".join(
         [f"{cls}: {p:.2f}" for cls, p in zip(classes, proba)]
     )
-    return f"Prediction: {pred} (probabilites -> {proba_str})"
+    return f"Prediction: {bool(pred)} (probabilites -> {proba_str})"
 
 inputs = []
 for feature in feature_names:
-    mapping = feature_map[feature]
-    inputs.append(gr.Dropdown(choices=list(mapping.keys()), label=feature.replace("_", " ").title(), value=list(mapping.keys())[0]))
+    inputs.append(gr.Textbox(label=feature))
 
-output = gr.Textbox(label="Result")
+output = gr.Textbox(label="Prediksjon")
 
 demo = gr.Interface(
-    fn=predict_mushroom,
+    fn=predict,
     inputs=inputs,
     outputs=output,
-    title="Poisonus mushroom predictor",
-    description="Predicts poisonus mushrooms by Martin"
+    title="DAT158 prosjekt",
+    description="Brystkreft pred"
 )
+
 
 if __name__ == "__main__":
     demo.launch()

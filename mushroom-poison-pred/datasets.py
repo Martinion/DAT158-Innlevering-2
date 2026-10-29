@@ -1,3 +1,7 @@
+import pandas as pd
+
+
+
 col_names = [
     "class",
     "cap_shape",
@@ -195,4 +199,30 @@ feature_map = {
         "Waste": "w",
         "Woods": "d",
     },
+}
+
+def load_mushroom_ds():
+    df = pd.read_csv("data/agaricus-lepiota.data",
+                 header=None,
+                 names=col_names)
+
+    target_col = "class"
+
+    X = df.drop(columns=target_col)
+    y = df[target_col]
+
+    return X, y
+
+def load_breast_cancer_ds():
+    from sklearn.datasets import load_breast_cancer
+    df = load_breast_cancer(as_frame=True)
+
+    X = df.data
+    y = df.target
+
+    return X, y
+
+DATASETS = {
+    "mushroom": load_mushroom_ds,
+    "cancer": load_breast_cancer_ds
 }
